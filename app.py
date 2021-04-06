@@ -4,6 +4,12 @@ app = FastAPI()
 import json
 from elasticsearch import Elasticsearch,RequestError,ElasticsearchException
 from config import server
+import os
+from io import BytesIO
+import tempfile
+import numpy as np
+
+f = tempfile.SpooledTemporaryFile()
 
 es = Elasticsearch(
     [server.host],
@@ -79,6 +85,12 @@ async def search_query(index:str=Body(...,embed=True),query:dict=Body(...,embed=
         raise HTTPException(status_code=402,detail=err.error)
         return 
 
-@app.post("/files/")
-async def create_file(file: bytes = File(...)):
-    return {"file_size": len(file)}
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile = File(...)):
+    path = '/Users/thinh/Desktop/elasticsearch'
+    random = np.random.choice(20)
+    f = open('{}_'.format(random)+file.filename,'wb')
+    f.write(file.file.read())
+    x = os.path.join(path,'{}_'.format(random)+file.filename)
+    print(x)
+    return {"filename": file.filename}
