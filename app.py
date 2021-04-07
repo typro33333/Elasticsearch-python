@@ -8,6 +8,9 @@ import os
 from io import BytesIO
 import tempfile
 import numpy as np
+import subprocess
+import sys
+from typing import Optional
 
 f = tempfile.SpooledTemporaryFile()
 
@@ -49,7 +52,12 @@ async def get_all_index():
     if repose.status_code == 200:
         repose = repose.json()
         for i in range(len(repose)):
+            if repose[i]['index'].startswith('.',0,1) == True:
+                continue
             arr.append(repose[i]['index'])
+        if len(arr) == 0:
+            raise HTTPException(status_code=404,detail='Data doesnt have index!')
+            return
         return arr
     else:
         raise HTTPException(status_code=404,detail="Server Down")
@@ -86,11 +94,19 @@ async def search_query(index:str=Body(...,embed=True),query:dict=Body(...,embed=
         return 
 
 @app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile = File(...)):
-    path = '/Users/thinh/Desktop/elasticsearch'
+async def create_upload_file(
+indexname:str=Body(...,embed=True),
+file: UploadFile = File(...),
+keepfile:Optional[str]=True):
+    path = '/Users/thinh/Desktop/elasticsearch/api'
     random = np.random.choice(20)
     f = open('{}_'.format(random)+file.filename,'wb')
     f.write(file.file.read())
+    filename = '{}_'.format(random)+file.filename
     x = os.path.join(path,'{}_'.format(random)+file.filename)
-    print(x)
-    return {"filename": file.filename}
+    subprocess.run('curl -H "Content-Type: application/json" -XPOST "localhost:9200/{}/_bulk?pretty&refresh" --data-binary "@{}"'.format(indexname,filename),shell=True)
+    if keepfile is not True:
+        os.remove(filename)
+        return [{"index":indexname,"filename": file.filename},{'Status':'Complete Import data for elasticsearch!','Keep_file':False}]
+    else:
+        return [{"index":indexname,"filename": file.filename},{'Status':'Complete Import data for elasticsearch!','Keep_file':True}]
