@@ -1,9 +1,9 @@
 from fastapi import FastAPI,Body,status,HTTPException,File, UploadFile
 import requests
-app = FastAPI()
 import json
 from elasticsearch import Elasticsearch,RequestError,ElasticsearchException
-from config import server
+from config.config_elastic import server
+from config.config_server import Setting
 import os
 from io import BytesIO
 import tempfile
@@ -11,17 +11,25 @@ import numpy as np
 import subprocess
 import sys
 from typing import Optional
+import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 f = tempfile.SpooledTemporaryFile()
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 es = Elasticsearch(
     [server.host],
     scheme=server.scheme,
     port=server.port,
 )
-
-some_string = '{"name" : "student"}'
-some_dict = json.loads(some_string)
 
 @app.get("/health")
 async def get_heal():
@@ -63,8 +71,8 @@ async def get_all_index():
         raise HTTPException(status_code=404,detail="Server Down")
         return
 
-@app.post("/index/total_value_index")
-async def total_query(index:str=Body(...,embed=True)):
+@app.get("/index/total_value_index")
+async def total_value_index(index:Optional[str]=None):
     try:
         result = es.search(index='{}'.format(index),body={"query":{"match_all":{}}})
         arr = []
@@ -110,3 +118,20 @@ keepfile:Optional[str]=True):
         return [{"index":indexname,"filename": file.filename},{'Status':'Complete Import data for elasticsearch!','Keep_file':False}]
     else:
         return [{"index":indexname,"filename": file.filename},{'Status':'Complete Import data for elasticsearch!','Keep_file':True}]
+
+@app.post("/delete/indexname")
+async def delete_index(indexname:Optional[str]=None):
+    if indexname == None:
+        raise HTTPException(status_code=402,detail='field is empty cant not delete!')
+        return
+    else:
+        try:
+            es.indices.delete(index=indexname)
+        except ElasticsearchException as error:
+            raise HTTPException(status_code=404,detail=error.error+' cant delete!')
+
+
+
+if __name__ == '__main__':
+    subprocess.run('pip install -r requirements.txt')
+    uvicorn.run('test:app', host = Setting.HOST, port = Setting.PORT, reload = Setting.RELOAD)
