@@ -4,4 +4,4 @@ class Config_Server:
         self.PORT = PORT
         self.RELOAD = RELOAD
 
-Setting = Config_Server('localhost','8000',True)
+Setting = Config_Server('localhost',8000,True)

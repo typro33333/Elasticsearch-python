@@ -130,8 +130,10 @@ async def delete_index(indexname:Optional[str]=None):
         except ElasticsearchException as error:
             raise HTTPException(status_code=404,detail=error.error+' cant delete!')
 
-
+@app.post("/search/custom/indexname")
+async def search_custom_indexname(indexname:Optional[str]=None):
+    return 'this api not complete!'
 
 if __name__ == '__main__':
-    subprocess.run('pip install -r requirements.txt')
-    uvicorn.run('test:app', host = Setting.HOST, port = Setting.PORT, reload = Setting.RELOAD)
+    uvicorn.run('app:app', host = Setting.HOST, port = Setting.PORT, reload = Setting.RELOAD)
+    
