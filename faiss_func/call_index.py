@@ -17,9 +17,8 @@ def call_all_index():
         return arr
 
 def total_index():
-    final_indices = elastic.indices.get_alias().keys()
-    print ("\nNew total:", len(final_indices), "indexes.") 
-    return len(final_indices)
+    final_indices = es.indices.get_alias().keys()
+    return {'total':len(final_indices)-2}
 
 def check_compase(query:str):
     return encoder.search(call_all_index(),query,2)

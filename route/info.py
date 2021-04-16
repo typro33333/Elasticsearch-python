@@ -4,6 +4,7 @@ from elasticsearch import Elasticsearch,RequestError,ElasticsearchException
 from core.config_elastic import es
 route = APIRouter()
 import requests
+from faiss_func.call_index import total_index
 
 @route.get("/health")
 async def get_heal():
@@ -34,8 +35,8 @@ async def get_all_index():
         raise HTTPException(status_code=404,detail="Server Down")
         return
 
-@route.get("/index/total_value_index")
-async def total_value_index(index:Optional[str]=None):
+@route.get("/index/total_value")
+async def total_value(index:Optional[str]=None):
     try:
         result = es.search(index='{}'.format(index),body={"query":{"match_all":{}}})
         arr = []
@@ -45,3 +46,7 @@ async def total_value_index(index:Optional[str]=None):
         attributes = [attr for attr in dir(err) if not attr.startswith('__')]
         raise HTTPException(status_code=402,detail=err.error)
         return
+
+@route.get('/total_index')
+async def total():
+    return total_index()
