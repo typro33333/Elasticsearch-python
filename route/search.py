@@ -22,8 +22,8 @@ async def search(name:str=Body(...,embed=True),id_index:str=Body(...,embed=True)
         raise HTTPException(status_code=401, detail="Error query")
         return
 
-@route.post("/index/query")
-async def search_query(index:str=Body(...,embed=True),query:dict=Body(...,embed=True)):
+@route.post("/{}/query")
+async def search_query(index:str,query:dict=Body(...,embed=True)):
     query_body = {
         "query": {
             "bool":{
@@ -40,7 +40,16 @@ async def search_query(index:str=Body(...,embed=True),query:dict=Body(...,embed=
         raise HTTPException(status_code=402,detail=err.error)
         return 
 
-@route.post("/custom/indexname")
-async def search_custom_indexname(indexname:Optional[str]=None):
-    return 'this api not complete!'
-
+@route.get("/math_all/")
+async def search_custom_indexname(indexname:str,page:Optional[int]=1):
+    arr = []
+    if indexname is not None:
+        try:
+            res = es.search(index=indexname, body={"query": {"match_all": {}}},from_=page)
+            for hit in res['hits']['hits']:
+                arr.append((hit['_source']))
+            return arr
+        except ElasticsearchException as err:
+            raise HTTPException(status_code=402,detail=err.error)
+    else:
+        raise HTTPException(status_code=404,detail='index name is None')

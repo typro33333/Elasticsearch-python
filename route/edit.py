@@ -6,7 +6,20 @@ import numpy as np
 import os
 import subprocess
 from faiss_func.call_index import encoder
+from core.config_elastic import es
+from faiss_func.call_index import call_all_index
+import time
 route = APIRouter()
+
+@route.get('reset/faiss/{}')
+def reset_faiss(comfirm:Optional[bool]=False):
+    if comfirm == True:
+        start = time.time()
+        encoder.build_index(call_all_index(),False)
+        stop = time.time()
+        return [{'Status':'Build Complete'},{'time_lost':'{}s'.format(stop-start)}]
+    else:
+        raise HTTPException(status_code=404,detail='U must think again!')
 
 @route.post("/uploadfile/new_index")
 async def create_upload_file(
@@ -26,6 +39,13 @@ keepfile:Optional[str]=False):
         return [{"index":indexname,"filename": file.filename},{'Status':'Complete Import data for elasticsearch!','Keep_file':False}]
     else:
         return [{"index":indexname,"filename": file.filename},{'Status':'Complete Import data for elasticsearch!','Keep_file':True}]
+
+@route.post("/insert/indexname")
+async def insert_index(indexname:Optional[str]=None):
+    if indexname != None:
+        es.indices.create(index=indexname)
+        return {'Index':'{} create completed'.format(indexname)}
+    raise HTTPException(status_code=402,detail='Please fill index-name')
 
 @route.post("/delete/indexname")
 async def delete_index(indexname:Optional[str]=None):

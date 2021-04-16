@@ -1,6 +1,6 @@
 import requests
 from faiss_func.encoder import UniversalEncoder
-
+from core.config_elastic import es
 ##encoder = UniversalEncoder("tstsv.ddns.net", 8501)
 encoder = UniversalEncoder("tstsv.ddns.net", 8501)
 
@@ -16,7 +16,11 @@ def call_all_index():
             arr.append(response[i]['index'])
         return arr
 
+def total_index():
+    final_indices = elastic.indices.get_alias().keys()
+    print ("\nNew total:", len(final_indices), "indexes.") 
+    return len(final_indices)
+
 def check_compase(query:str):
-    encoder.build_index(call_all_index(),False)
     return encoder.search(call_all_index(),query,2)
     
