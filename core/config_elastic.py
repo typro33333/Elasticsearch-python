@@ -6,8 +6,8 @@ class config:
         self.scheme = scheme
         self.port = port
 
-server = config('localhost',"http",9200) ##Local Host
-##server = config('tstsv.ddns.net',"http",9200)  ##Server
+##server = config('localhost',"http",9200) ##Local Host
+server = config('tstsv.ddns.net',"http",9200)  ##Server
 
 es = Elasticsearch(
     [server.host],

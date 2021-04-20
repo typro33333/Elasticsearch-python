@@ -8,7 +8,7 @@ from faiss_func.call_index import total_index
 
 @route.get("/health")
 async def get_heal():
-    r = requests.get('http://localhost:9200/_cat/health?format=json')
+    r = requests.get('http://tstsv.ddns.net:9200/_cat/health?format=json')
     if r.status_code == 200:
         response = r.json()
         return response
@@ -18,7 +18,7 @@ async def get_heal():
     
 @route.get('/get_all_index')
 async def get_all_index():
-    uri = "http://localhost:9200/_cat/indices?format=json"
+    uri = "http://tstsv.ddns.net:9200/_cat/indices?format=json"
     repose = requests.get(uri)
     arr = []
     if repose.status_code == 200:
@@ -33,18 +33,6 @@ async def get_all_index():
         return arr
     else:
         raise HTTPException(status_code=404,detail="Server Down")
-        return
-
-@route.get("/index/total_value")
-async def total_value(index:Optional[str]=None):
-    try:
-        result = es.search(index='{}'.format(index),body={"query":{"match_all":{}}})
-        arr = []
-        arr.append({'total':result['hits']['total']['value']})
-        return arr
-    except ElasticsearchException as err:
-        attributes = [attr for attr in dir(err) if not attr.startswith('__')]
-        raise HTTPException(status_code=402,detail=err.error)
         return
 
 @route.get('/total_index')

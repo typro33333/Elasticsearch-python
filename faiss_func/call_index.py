@@ -5,7 +5,7 @@ from core.config_elastic import es
 encoder = UniversalEncoder("tstsv.ddns.net", 8501)
 
 def call_all_index():
-    uri = "http://localhost:9200/_cat/indices?format=json"
+    uri = "http://tstsv.ddns.net:9200/_cat/indices?format=json"
     response = requests.get(uri)
     arr = []
     if response.status_code == 200:

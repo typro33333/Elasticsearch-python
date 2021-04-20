@@ -11,7 +11,7 @@ from faiss_func.call_index import call_all_index
 import time
 route = APIRouter()
 
-@route.get('reset/faiss/{}')
+@route.get('/reset/faiss/{}')
 def reset_faiss(comfirm:Optional[bool]=False):
     if comfirm == True:
         start = time.time()
