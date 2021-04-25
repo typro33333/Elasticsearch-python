@@ -9,6 +9,7 @@ from faiss_func.call_index import encoder
 from core.config_elastic import es
 from faiss_func.call_index import call_all_index
 import time
+import re
 route = APIRouter()
 
 @route.get('/reset/faiss/{}')
@@ -40,20 +41,45 @@ keepfile:Optional[str]=False):
     else:
         return [{"index":indexname,"filename": file.filename},{'Status':'Complete Import data for elasticsearch!','Keep_file':True}]
 
-@route.post("/insert/indexname")
-async def insert_index(indexname:Optional[str]=None):
+@route.post("/insert/indexname_v1")
+async def insert_index_v1(indexname:Optional[str]=None):
     if indexname != None:
-        es.indices.create(index=indexname)
-        return {'Index':'{} create completed'.format(indexname)}
-    raise HTTPException(status_code=402,detail='Please fill index-name')
+        indexname = indexname.lower()
+        l = indexname.split(' ')
+        abc =''
+        for i in range(len(l)):
+            if i == 0:
+                abc = l[i]
+            else:
+                abc = abc+'-'+l[i]
+        try:
+            es.indices.create(index=abc)
+            return {'Index':'{} create completed'.format(indexname)}
+        except ElasticsearchException as error:
+            raise HTTPException(status_code=402,detail=error.error)
+    else:
+        raise HTTPException(status_code=402,detail='Please fill index-name')
+
+@route.post("/insert/indexname_v2")
+async def insert_index_v2(indexname:Optional[str]=None):
+    if indexname != None:
+        indexname = re.sub(r"[^\w\s]",'',indexname.lower())
+        indexname = re.sub(r"\s+", '-', indexname)
+        try:
+            es.indices.create(index=abc)
+            return {'Index':'{} create completed'.format(indexname)}
+        except ElasticsearchException as error:
+            raise HTTPException(status_code=402,detail=error.error)
+    else:
+        raise HTTPException(status_code=402,detail='Please fill index-name')
 
 @route.post("/delete/indexname")
 async def delete_index(indexname:Optional[str]=None):
     if indexname == None:
         raise HTTPException(status_code=402,detail='field is empty cant not delete!')
-        return
     else:
         try:
             es.indices.delete(index=indexname)
+            return {'delete_complete':''.format(indexname)}
         except ElasticsearchException as error:
             raise HTTPException(status_code=404,detail=error.error+' cant delete!')

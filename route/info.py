@@ -5,6 +5,7 @@ from core.config_elastic import es
 route = APIRouter()
 import requests
 from faiss_func.call_index import total_index
+import re
 
 @route.get("/health")
 async def get_heal():
@@ -16,8 +17,8 @@ async def get_heal():
         raise HTTPException(status_code=401,detail='Server error')
         return
     
-@route.get('/get_all_index')
-async def get_all_index():
+@route.get('/get_all_index_v1')
+async def get_all_index_v1():
     uri = "http://tstsv.ddns.net:9200/_cat/indices?format=json"
     repose = requests.get(uri)
     arr = []
@@ -34,6 +35,14 @@ async def get_all_index():
     else:
         raise HTTPException(status_code=404,detail="Server Down")
         return
+
+@route.get('/get_all_index_v2')
+async def get_all_index_v2():
+    response = es.indices.get('*')
+    l_index = []
+    for key in [*response]:
+        l_index.append(re.sub(r"[^\w\s]", ' ', key))
+    return l_index
 
 @route.get('/total_index')
 async def total():
