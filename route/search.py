@@ -4,7 +4,7 @@ import numpy as np
 from core.config_elastic import es
 from elasticsearch import Elasticsearch,RequestError,ElasticsearchException
 import re,time,requests
-from func.call_index import call_all_index
+from func.call_index import call_all_index_v2
 
 route = APIRouter()
 
@@ -29,7 +29,7 @@ async def search_custom_indexname(indexname:str,page:Optional[int]=1):
 @route.get('/the_similar_word')
 async def search_similar(query:Optional[str]=None):
     if query != None:
-        a = encoder.search(call_all_index(),query,10)
+        a = encoder.search(call_all_index_v2(),query,10)
         return a
     else:
         raise HTTPException(status_code=402,detail='search fill is none')

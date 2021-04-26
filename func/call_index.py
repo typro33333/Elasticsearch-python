@@ -2,7 +2,11 @@ import requests
 from core.config_elastic import es
 import re
 
-def call_all_index():
+def call_all_index_v1():
+    response = es.indices.get('*')
+    return [*response]
+
+def call_all_index_v2():
     response = es.indices.get('*')
     l_index = []
     for key in [*response]:

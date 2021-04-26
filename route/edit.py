@@ -3,9 +3,14 @@ from typing import Optional
 from elasticsearch import Elasticsearch,RequestError,ElasticsearchException
 import numpy as np
 import os,subprocess,time,re,requests
-from func.call_index import call_all_index
+from func.call_index import call_all_index_v2,call_all_index_v1
 from core.config_elastic import server,es
 from route.encoder import encoder
+from pydantic import BaseModel
+
+class Item(BaseModel):
+    index:list
+
 
 route = APIRouter()
 
@@ -13,7 +18,7 @@ route = APIRouter()
 def reset_faiss(comfirm:Optional[bool]=False):
     if comfirm == True:
         start = time.time()
-        encoder.build_index(call_all_index(),False)
+        encoder.build_index(call_all_index_v2(),False)
         stop = time.time()
         return [{'Status':'Build Complete'},{'time_lost':'{}s'.format(stop-start)}]
     else:
@@ -77,7 +82,7 @@ async def insert_index_v2(indexname:Optional[str]=None):
         raise HTTPException(status_code=402,detail='Please fill index-name')
 
 @route.post("/train/index_v1")
-async def train_index_v1(index:list=Body(...,embed=True)):
+async def train_index_v1(index:Item):
     check = isinstance(index,list)
     if check == True:
         start = time.time()
@@ -103,24 +108,17 @@ async def delete_index(indexname:Optional[str]=None):
 @route.post("/delete_all/index")
 async def delete_all_index(passwords:Optional[str]=None):
     if passwords == 'tt123':
-        uri = "http://tstsv.ddns.net:9200/_cat/indices?format=json"
-        repose = requests.get(uri)
-        arr = []
-        if repose.status_code == 200:
-            repose = repose.json()
-            for i in range(len(repose)):
-                if repose[i]['index'].startswith('.',0,1) == True:
-                    continue
-                arr.append(repose[i]['index'])
-            if len(arr) == 0:
-                raise HTTPException(status_code=404,detail='Data doesnt have index!')
-            try:
-                start = time.time()
-                for i in arr:
-                    es.indices.delete(index=i)
-                stop = time.time()
-                raise HTTPException(status_code=200,detail=['Delete all index complete!',{'time_lost':'{}s'.format(stop-start)}])
-            except ElasticsearchException as error:
-                raise HTTPException(status_code=402,detail=error.error)
+        try:
+            start = time.time()
+            arr = call_all_index_v1()
+            for i in arr:
+                es.indices.delete(index=i)
+                """i = re.sub(r"[^\w\s]",' ',i)
+                print(i)
+                encoder.remove_index(i)"""
+            stop = time.time()
+            raise HTTPException(status_code=200,detail={'st':'complete','time_lost':stop-start})
+        except ElasticsearchException as error:
+            raise HTTPException(status_code=422,detail=error.error)
     else:
         raise HTTPException(status_code=404,detail='Error passwords')
