@@ -113,9 +113,9 @@ async def delete_all_index(passwords:Optional[str]=None):
             arr = call_all_index_v1()
             for i in arr:
                 es.indices.delete(index=i)
-                """i = re.sub(r"[^\w\s]",' ',i)
+                i = re.sub(r"[^\w\s]",' ',i)
                 print(i)
-                encoder.remove_index(i)"""
+                encoder.remove_index(i)
             stop = time.time()
             raise HTTPException(status_code=200,detail={'st':'complete','time_lost':stop-start})
         except ElasticsearchException as error:
