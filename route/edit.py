@@ -87,7 +87,8 @@ async def train_index_v1(index:Item):
     print(index)
     if check == True:
         start = time.time()
-        encoder.build_index(index,True)
+        for i in index:
+            encoder.build_index([i],True)
         stop = time.time()
         raise HTTPException(status_code=200,detail={'Time_lost':stop-start})
     else:
