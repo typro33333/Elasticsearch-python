@@ -84,11 +84,8 @@ async def insert_index_v2(indexname:Optional[str]=None):
 @route.post("/train/index_v1")
 async def train_index_v1(index:Item):
     check = isinstance(index,list)
-    print(index)
     if check == True:
         start = time.time()
-        for i in index:
-            encoder.build_index([i],True)
         stop = time.time()
         raise HTTPException(status_code=200,detail={'Time_lost':stop-start})
     else:
