@@ -105,7 +105,23 @@ async def delete_index(indexname:Optional[str]=None):
         except ElasticsearchException as error:
             raise HTTPException(status_code=404,detail=error.error+' cant delete!')
 
-@route.post("/delete_all/index")
+@route.post("/delete_all/index_v1")
+async def delete_all_index(passwords:Optional[str]=None):
+    if passwords == 'tt123':
+        try:
+            start = time.time()
+            arr = call_all_index_v1()
+            for i in arr:
+                es.indices.delete(index=i)
+                i = re.sub(r"[^\w\s]",' ',i)
+            stop = time.time()
+            raise HTTPException(status_code=200,detail={'st':'complete','time_lost':stop-start})
+        except ElasticsearchException as error:
+            raise HTTPException(status_code=422,detail=error.error)
+    else:
+        raise HTTPException(status_code=404,detail='Error passwords')
+
+@route.post("/delete_all/index_v2")
 async def delete_all_index(passwords:Optional[str]=None):
     if passwords == 'tt123':
         try:
