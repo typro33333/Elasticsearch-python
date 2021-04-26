@@ -83,13 +83,10 @@ async def insert_index_v2(indexname:Optional[str]=None):
 
 @route.post("/train/index_v1")
 async def train_index_v1(index:Item):
-    check = isinstance(index,list)
-    if check == True:
-        start = time.time()
-        stop = time.time()
-        raise HTTPException(status_code=200,detail={'Time_lost':stop-start})
-    else:
-        raise HTTPException(status_code=402,detail='wrong list input!')
+    start = time.time()
+    print(index)
+    stop = time.time()
+    raise HTTPException(status_code=200,detail={'Time_lost':stop-start})
 
 @route.post("/delete/indexname")
 async def delete_index(indexname:Optional[str]=None):
