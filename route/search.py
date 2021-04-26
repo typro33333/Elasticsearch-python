@@ -28,9 +28,9 @@ async def search_custom_indexname(indexname:str,page:Optional[int]=1):
         raise HTTPException(status_code=404,detail='index name is None')
 
 @route.get('/the_similar_word')
-async def search_similar(query:Optional[str]=None):
+async def search_similar(query:Optional[str]=None,number:Optional[int]=2):
     if query != None:
-        a = encoder.search(call_all_index_v2(),query,10)
+        a = encoder.search(call_all_index_v2(),query,number)
         return a
     else:
         raise HTTPException(status_code=402,detail='search fill is none')
