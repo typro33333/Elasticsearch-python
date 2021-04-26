@@ -4,7 +4,6 @@ import numpy as np
 from core.config_elastic import es
 from elasticsearch import Elasticsearch,RequestError,ElasticsearchException
 import re,time,requests
-from faiss_pi4.test import encoder
 from func.call_index import call_all_index
 
 route = APIRouter()
@@ -64,10 +63,3 @@ async def search_query(index:str,query:dict=Body(...,embed=True)):
         raise HTTPException(status_code=402,detail=err.error)
         return 
 
-@route.get('/test')
-async def searchtest():
-    print(call_all_index())
-    start = time.time()
-    encoder.build_index(call_all_index(),False)
-    stop = time.time()
-    return {'status':'complete','time_lost':stop-start}
