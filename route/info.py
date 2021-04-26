@@ -42,7 +42,7 @@ async def get_all_index_v2():
     l_index = []
     for key in [*response]:
         l_index.append(re.sub(r"[^\w\s]", ' ', key))
-    return [l_index,{'total_index':len(l_index)}]
+    return [{'total_index':len(l_index)},l_index]
 
 @route.get('/total_index')
 async def total():

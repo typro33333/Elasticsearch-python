@@ -5,6 +5,7 @@ from core.config_elastic import es
 from elasticsearch import Elasticsearch,RequestError,ElasticsearchException
 import re,time,requests
 from func.call_index import call_all_index_v2
+from route.encoder import encoder
 
 route = APIRouter()
 
