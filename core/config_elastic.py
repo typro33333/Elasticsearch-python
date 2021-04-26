@@ -13,4 +13,5 @@ es = Elasticsearch(
     [server.host],
     scheme=server.scheme,
     port=server.port,
+    timeout=30
 )
