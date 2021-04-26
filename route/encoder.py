@@ -1,6 +1,6 @@
 import numpy as np
 import requests, torch, os
-from faiss_pi4.config import setting
+from route.config import setting
 import numpy as np
 from torch import nn
 import os
@@ -80,3 +80,5 @@ class UniversalEncoder():
         setting.index_on_ram.pop(index)
         torch.save(setting.index_on_ram,self.storage_dir)
         return setting.index_on_ram
+
+encoder = UniversalEncoder("tstsv.ddns.net", 8501)

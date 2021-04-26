@@ -5,7 +5,8 @@ import numpy as np
 import os,subprocess,time,re,requests
 from func.call_index import call_all_index
 from core.config_elastic import server,es
-from faiss_pi4.test import encoder
+from route.encoder import encoder
+
 route = APIRouter()
 
 @route.get('/reset/faiss/{}')
