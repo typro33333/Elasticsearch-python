@@ -9,7 +9,7 @@ from route.encoder import encoder
 from pydantic import BaseModel
 
 class Item(BaseModel):
-    index:str
+    index:list
 
 
 route = APIRouter()
@@ -83,9 +83,8 @@ async def insert_index_v2(indexname:Optional[str]=None):
 
 @route.post("/train/index_v1")
 async def train_index_v1(index:Item):
-    print(index.index)
     start = time.time()
-    encoder.build_index([index.index],True)
+    encoder.build_index(index.index,True)
     stop = time.time()
     raise HTTPException(status_code=200,detail={'Time_lost':stop-start})
 
