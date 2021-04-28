@@ -1,4 +1,4 @@
 class Setting():
-    index_on_ram:list = []
+    index_on_ram = None
 
 setting = Setting()
