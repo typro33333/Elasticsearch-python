@@ -9,14 +9,14 @@ from core.config_elastic import server
 import re
 
 @route.get("/health")
-async def get_heal_v1():
+async def get_heal():
     try:
-        return es.cluster.health()
+        return es.cat.health()
     except ElasticsearchException as error:
         raise HTTPException(status_code=401,detail=error.error)
 
 @route.get("/info")
-async def get_heal_v2():
+async def get_info():
     try:
         return es.info()
     except ElasticsearchException as error:
