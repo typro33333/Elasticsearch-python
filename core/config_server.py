@@ -4,5 +4,5 @@ class Config_Server:
         self.PORT = PORT
         self.RELOAD = RELOAD
 
-Setting = Config_Server('localhost',8000,True) ##Localhost
-##Setting = Config_Server('tstsv.ddns.net',8000,True) ##Server
+##Setting = Config_Server('localhost',8000,True) ##Localhost
+Setting = Config_Server('0.0.0.0',8000,True) ##Server
