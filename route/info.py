@@ -5,11 +5,12 @@ from core.config_elastic import es
 route = APIRouter()
 import requests
 from func.call_index import total_index
+from core.config_elastic import server
 import re
 
 @route.get("/health")
 async def get_heal():
-    r = requests.get('http://tstsv.ddns.net:9200/_cat/health?format=json')
+    r = requests.get('http://{}:9200/_cat/health?format=json'.format(server.host))
     if r.status_code == 200:
         response = r.json()
         return response
@@ -19,7 +20,7 @@ async def get_heal():
     
 @route.get('/get_all_index_v1')
 async def get_all_index_v1():
-    uri = "http://tstsv.ddns.net:9200/_cat/indices?format=json"
+    uri = "http://{}:9200/_cat/indices?format=json".format(server.host)
     repose = requests.get(uri)
     arr = []
     if repose.status_code == 200:
