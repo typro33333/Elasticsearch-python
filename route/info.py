@@ -8,8 +8,8 @@ from func.call_index import total_index
 from core.config_elastic import server
 import re
 
-@route.get("/health")
-async def get_heal():
+@route.get("/health_v1")
+async def get_heal_v1():
     r = requests.get('http://{}:9200/_cat/health?format=json'.format(server.host))
     if r.status_code == 200:
         response = r.json()
@@ -17,7 +17,14 @@ async def get_heal():
     else:
         raise HTTPException(status_code=401,detail='Server error')
         return
-    
+
+@route.get("/info")
+async def get_heal_v2():
+    try:
+        return es.info()
+    except ElasticsearchException as error:
+        raise HTTPException(status_code=401,detail=error.error)
+
 @route.get('/get_all_index_v1')
 async def get_all_index_v1():
     uri = "http://{}:9200/_cat/indices?format=json".format(server.host)

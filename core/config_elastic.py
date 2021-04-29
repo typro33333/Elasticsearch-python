@@ -1,9 +1,9 @@
 from elasticsearch import Elasticsearch,RequestError,ElasticsearchException
 
 class config:
-    def __init__(self,host,scheme,port):
+    def __init__(self,host,protocol,port):
         self.host = host
-        self.scheme = scheme
+        self.protocol = protocol
         self.port = port
 
 server = config('localhost',"http",9200) ##Local Host
@@ -11,7 +11,7 @@ server = config('localhost',"http",9200) ##Local Host
 
 es = Elasticsearch(
     [server.host],
-    scheme=server.scheme,
+    http=server.protocol,
     port=server.port,
-    timeout=1000000
+    timeout=1000000,
 )
