@@ -1,6 +1,6 @@
 import numpy as np
 import requests, faiss, os, json
-from config import setting
+from route.config import setting
 import numpy as np
 
 class UniversalEncoder():
