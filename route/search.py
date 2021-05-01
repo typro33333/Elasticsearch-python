@@ -31,7 +31,7 @@ async def search_custom_indexname(indexname:str,page:Optional[int]=1):
 async def search_similar(query:Optional[str]=None,number:Optional[int]=2):
     if query != None:
         start = time.time()
-        a = encoder.search(call_all_index_v2(),query,number)
+        a = encoder.search(query,number)
         stop = time.time()
         raise HTTPException(status_code=200,detail=[a,{'time_lost':stop-start}])
     else:

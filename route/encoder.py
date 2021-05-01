@@ -1,19 +1,26 @@
 import numpy as np
-import requests, faiss, os
-from route.config import setting
+import requests, faiss, os, json
+from config import setting
 import numpy as np
 
 class UniversalEncoder():
         
     FEATURE_SIZE = 512
     BATCH_SIZE = 32
-    storage_dir = str(os.path.realpath("."))+"/search_data/faiss.index"
+    vectors_dir = str(os.path.realpath("."))+"/search_data/faiss.index"
+    data_dir = str(os.path.realpath("."))+"/search_data/faiss.txt"
 
     def __init__(self, host, port):
         self.server_url = "http://{host}:{port}/v1/models/model:predict".format(
             host = host,
             port = port
         )
+        setting.index_on_ram = faiss.read_index(self.vectors_dir)
+        try:
+            setting.data_on_ram = json.load(open(self.data_dir,"r"))["data"]
+        except Exception:
+            setting.data_on_ram = []
+
     @staticmethod
     def _standardized_input(sentence:str):
         return sentence.replace("\n", "").lower().strip()[:1000]
@@ -34,37 +41,45 @@ class UniversalEncoder():
         return all_vectors
     
     def build_index(self, data:list, append:bool=True):
-        vector = self.encode(data)                      #converter data to vectors
-        index = faiss.IndexFlatL2(self.FEATURE_SIZE)
-        if append == True:
-            index = faiss.read_index(self.storage_dir)
-        index.add(vector)
-        faiss.write_index(index,self.storage_dir)
-        setting.index_on_ram = index
-        return index
+        vector = self.encode(data)                                         #converter data to vectors
+        if append == False:
+            file = open(self.data_dir,"w")
+            file.write("")
+            file.close()
+            setting.index_on_ram = faiss.IndexFlatL2(self.FEATURE_SIZE)    #init the index
+            setting.data_on_ram = []
+        setting.index_on_ram.add(vector)
+        setting.data_on_ram.extend(data)
+        json.dump({"data":setting.data_on_ram},open(self.data_dir,"w"))
+        faiss.write_index(setting.index_on_ram,self.vectors_dir)
+        return setting.index_on_ram
     
-    def search(self, data, query, numb_result:int=1):
+    def search(self, query, numb_result:int=1):
         if setting.index_on_ram == None:
-            setting.index_on_ram = faiss.read_index(self.storage_dir)
+            setting.index_on_ram = faiss.read_index(self.vectors_dir)
         index = setting.index_on_ram
         query_vector = self.encode([query])
         top_k_result = index.search(query_vector, numb_result)
+        print(len(setting.data_on_ram))
         return [
-            data[_id] for _id in top_k_result[1].tolist()[0]
+            setting.data_on_ram[_id] for _id in top_k_result[1].tolist()[0]
         ]
+    
     def remove_index(self, query):
-        #get current indexs
-        if setting.index_on_ram == None:
-            setting.index_on_ram = faiss.read_index(self.storage_dir)
-        index = setting.index_on_ram
-        #search index
-        query_vector = self.encode([query])
-        id = index.search(query_vector,1)[1][0][0]
-        #remove data from index
-        index.remove_ids(np.array([id]))
-        #update data
-        faiss.write_index(index,self.storage_dir)
-        setting.index_on_ram = index
-        return index
+        try:
+            #get current indexs
+            if setting.index_on_ram == None:
+                setting.index_on_ram = faiss.read_index(self.vectors_dir)
+            #search index
+            query_vector = self.encode([query])
+            id = setting.index_on_ram.search(query_vector,1)[1][0][0]
+            #remove data from index and data on ram
+            setting.index_on_ram.remove_ids(np.array([id]))
+            setting.data_on_ram.pop(id)
+            #update data
+            faiss.write_index(setting.index_on_ram,self.vectors_dir)
+        except Exception:
+            return False
+        return True
 
 encoder = UniversalEncoder("tstsv.ddns.net", 8501)
