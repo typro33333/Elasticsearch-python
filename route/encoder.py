@@ -82,4 +82,4 @@ class UniversalEncoder():
             return False
         return True
 
-encoder = UniversalEncoder("tstsv.ddns.net", 8501)
+encoder = UniversalEncoder("localhost", 8501)
