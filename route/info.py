@@ -22,6 +22,14 @@ async def get_info():
     except ElasticsearchException as error:
         raise HTTPException(status_code=401,detail=error.error)
 
+@route.get("/stronge_data")
+async def get_stronge_total_data():
+    r = requests.get('http://localhost:9200/_cat/allocation?format=json')
+    result = r.json()
+    kb = result[0]["disk.indices"]
+    return kb
+
+
 @route.get('/get_all_index_v1')
 async def get_all_index_v1():
     uri = "http://{}:9200/_cat/indices?format=json".format(server.host)

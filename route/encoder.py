@@ -15,7 +15,10 @@ class UniversalEncoder():
             host = host,
             port = port
         )
-        setting.index_on_ram = faiss.read_index(self.vectors_dir)
+        try:
+            setting.index_on_ram = faiss.read_index(self.vectors_dir)
+        except Exception:
+            setting.index_on_ram = None
         try:
             setting.data_on_ram = json.load(open(self.data_dir,"r"))["data"]
         except Exception:
@@ -43,7 +46,11 @@ class UniversalEncoder():
     def build_index(self, data:list, append:bool=True):
         vector = self.encode(data)                                         #converter data to vectors
         if append == False:
-            file = open(self.data_dir,"w")
+            try:
+                file = open(self.data_dir,"w")
+            except Exception:
+                os.mkdir(self.data_dir.split("/")[-2])
+                file = open(self.data_dir,"w")
             file.write("")
             file.close()
             setting.index_on_ram = faiss.IndexFlatL2(self.FEATURE_SIZE)    #init the index
@@ -78,8 +85,12 @@ class UniversalEncoder():
             setting.data_on_ram.pop(id)
             #update data
             faiss.write_index(setting.index_on_ram,self.vectors_dir)
+            file = open(self.data_dir,"w")
+            file.write("")
+            json.dump({"data":setting.data_on_ram},file)
+            file.close()
         except Exception:
             return False
         return True
 
-encoder = UniversalEncoder("localhost", 8501)
+encoder = UniversalEncoder('localhost', '8501')

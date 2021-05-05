@@ -27,13 +27,18 @@ async def search_custom_indexname(indexname:str,page:Optional[int]=1):
     else:
         raise HTTPException(status_code=404,detail='index name is None')
 
-@route.get('/the_similar_word')
-async def search_similar(query:Optional[str]=None,number:Optional[int]=2):
-    if query != None:
+@route.post('/the_similar_word')
+async def search_similar(query:str=Body(...,embed=True),number:Optional[int]=Body(...,embed=True)):
+    if query != None and number != None:
+        named_tuple = time.localtime() # get struct_time
+        time_string = time.strftime("%m/%d/%Y", named_tuple)
         start = time.time()
         a = encoder.search(query,number)
+        data = []
+        for i in a:
+            data.append({'description':i})
         stop = time.time()
-        raise HTTPException(status_code=200,detail=[a,{'time_lost':stop-start}])
+        return [data,{'time_lost':stop-start}]
     else:
         raise HTTPException(status_code=402,detail='search fill is none')
 
