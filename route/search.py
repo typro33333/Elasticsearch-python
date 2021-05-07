@@ -10,7 +10,7 @@ from route.encoder import encoder
 route = APIRouter()
 
 @route.get("/math_all/")
-async def search_custom_indexname(indexname:str,page:Optional[int]=1):
+async def search_custom_indexname(indexname:str):
     arr = []
     if indexname is not None:
         try:
@@ -18,7 +18,7 @@ async def search_custom_indexname(indexname:str,page:Optional[int]=1):
                 indexname = indexname.lower()
                 indexname = re.sub(r"\s+", '-', indexname)
             print(indexname)
-            res = es.search(index=indexname, body={"query": {"match_all": {}}},from_=page)
+            res = es.search(index=indexname, body={"query": {"match_all": {}}})
             for hit in res['hits']['hits']:
                 arr.append((hit['_source']))
             return arr
@@ -36,9 +36,19 @@ async def search_similar(query:str=Body(...,embed=True),number:Optional[int]=Bod
         a = encoder.search(query,number)
         data = []
         for i in a:
-            data.append({'description':i})
+            data.append(i)
+        arr = []
+        for i in a:
+            if i.find('-') == -1:
+                i = i.lower()
+                i = re.sub(r"\s+", '-', i)
+            res = es.search(index=i, body={"query": {"match_all": {}}})
+            for hit in res['hits']['hits']:
+                arr.append((hit['_source']))
+        for i in range(len(arr)):
+            arr[i]['title'] = data[i]
         stop = time.time()
-        return [data,{'time_lost':stop-start}]
+        return [arr,{'time_lost':stop-start}]
     else:
         raise HTTPException(status_code=402,detail='search fill is none')
 
