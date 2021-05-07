@@ -54,7 +54,7 @@ async def search_similar(query:str=Body(...,embed=True),number:Optional[int]=Bod
 
 @route.post('/get_query/{name_index}')
 async def search(name:str=Body(...,embed=True),id_index:str=Body(...,embed=True)):
-    uri = "http://tstsv.ddns.net:9200/{}/_doc/{}".format(name,id_index)
+    uri = "http://localhost:9200/{}/_doc/{}".format(name,id_index)
     respose = requests.get(uri)
     if respose.status_code == 200:
         respose = respose.json()
